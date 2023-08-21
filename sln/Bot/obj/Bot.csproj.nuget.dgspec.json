@@ -1,32 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ivasha222\\Desktop\\Новая папка\\Bot\\Bot.csproj": {}
+    "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\Bot.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ivasha222\\Desktop\\Новая папка\\Bot\\Bot.csproj": {
+    "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\Bot.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ivasha222\\Desktop\\Новая папка\\Bot\\Bot.csproj",
+        "projectUniqueName": "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\Bot.csproj",
         "projectName": "Bot",
-        "projectPath": "C:\\Users\\ivasha222\\Desktop\\Новая папка\\Bot\\Bot.csproj",
-        "packagesPath": "C:\\Users\\ivasha222\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ivasha222\\Desktop\\Новая папка\\Bot\\obj\\",
+        "projectPath": "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\Bot.csproj",
+        "packagesPath": "C:\\Users\\yuab\\.nuget\\packages\\",
+        "outputPath": "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\ivasha222\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\yuab\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net6.0"
+          "net7.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {}
+          "https://api.nuget.org/v3/index.json": {},
+          "https://exxeta.pkgs.visualstudio.com/_packaging/Exxeta.MPT.SES.Shared/nuget/v3/index.json": {}
         },
         "frameworks": {
-          "net6.0": {
-            "targetAlias": "net6.0",
+          "net7.0": {
+            "targetAlias": "net7.0",
             "projectReferences": {}
           }
         },
@@ -37,8 +37,8 @@
         }
       },
       "frameworks": {
-        "net6.0": {
-          "targetAlias": "net6.0",
+        "net7.0": {
+          "targetAlias": "net7.0",
           "dependencies": {
             "DSharpPlus": {
               "target": "Package",
@@ -85,7 +85,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }
