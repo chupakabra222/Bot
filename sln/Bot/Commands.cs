@@ -24,7 +24,7 @@ namespace Bot
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Проблема на стороне сервера"));
                 return;
             }
-            await MessageFormat.StartPlay(ctx.Client, ctx.Member, number);
+            await Player.StartPlay(ctx.Client, ctx.Member, number);
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent($"Начато транслирование"));
         }
         [SlashCommand("List", "It sends a list of radio stations for your choice")]

@@ -60,7 +60,7 @@ namespace Bot
 							return;
 						}
 						DiscordChannel channel = invoker.VoiceState.Channel;
-						MessageFormat.StartPlay(client, invoker, number);
+						Player.StartPlay(client, invoker, number);
 						await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(oldSelectMenu).AddComponents(button));
 					}
 				else
@@ -111,10 +111,6 @@ namespace Bot
 
 
 			System.Timers.Timer updateTimer = new System.Timers.Timer(900000); //MessageFormat.UpdateList раз в 15 минут
-
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
-			Console.ForegroundColor = ConsoleColor.White;
 
 			updateTimer.Elapsed += async (s, e) => {
 				controller.WaitOne();

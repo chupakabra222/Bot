@@ -1,28 +1,28 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\Bot.csproj": {}
+    "C:\\Users\\ivasha222\\Desktop\\BotRepos\\Bot\\sln\\Bot\\Bot.csproj": {}
   },
   "projects": {
-    "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\Bot.csproj": {
+    "C:\\Users\\ivasha222\\Desktop\\BotRepos\\Bot\\sln\\Bot\\Bot.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\Bot.csproj",
+        "projectUniqueName": "C:\\Users\\ivasha222\\Desktop\\BotRepos\\Bot\\sln\\Bot\\Bot.csproj",
         "projectName": "Bot",
-        "projectPath": "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\Bot.csproj",
-        "packagesPath": "C:\\Users\\yuab\\.nuget\\packages\\",
-        "outputPath": "C:\\Projects\\github.com-Ivan\\Bot\\sln\\Bot\\obj\\",
+        "projectPath": "C:\\Users\\ivasha222\\Desktop\\BotRepos\\Bot\\sln\\Bot\\Bot.csproj",
+        "packagesPath": "C:\\Users\\ivasha222\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ivasha222\\Desktop\\BotRepos\\Bot\\sln\\Bot\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\yuab\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ivasha222\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "https://api.nuget.org/v3/index.json": {},
-          "https://exxeta.pkgs.visualstudio.com/_packaging/Exxeta.MPT.SES.Shared/nuget/v3/index.json": {}
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net7.0": {
@@ -85,7 +85,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.400\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     }
