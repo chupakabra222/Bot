@@ -1,27 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <Company>YagorLLC</Company>
-    <Product>RadioYaGor</Product>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+		<Configurations>Debug;Release;Test</Configurations>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<OutputType>Exe</OutputType>
+		<AssemblyVersion>2.0.0.0</AssemblyVersion>
+		<Company>YagorLLC</Company>
+		<Product>RadioYaGor</Product>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="2.ico" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="2.ico" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.3.0" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.3.0" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.3.0" />
-    <PackageReference Include="DSharpPlus.Lavalink" Version="4.3.0" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.3.0" />
-    <PackageReference Include="DSharpPlus.VoiceNext" Version="4.3.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="DSharpPlus"
+						  Version="4.3.0" />
+		<PackageReference Include="DSharpPlus.CommandsNext"
+						  Version="4.3.0" />
+		<PackageReference Include="DSharpPlus.Interactivity"
+						  Version="4.3.0" />
+		<PackageReference Include="DSharpPlus.Lavalink"
+						  Version="4.3.0" />
+		<PackageReference Include="DSharpPlus.SlashCommands"
+						  Version="4.3.0" />
+		<PackageReference Include="DSharpPlus.VoiceNext"
+						  Version="4.3.0" />
+		<PackageReference Include="Newtonsoft.Json"
+						  Version="13.0.3" />
+	</ItemGroup>
 
 </Project>
