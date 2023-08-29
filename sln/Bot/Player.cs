@@ -23,6 +23,9 @@ namespace Bot
             LavalinkLoadResult loadResult = await node.Rest.GetTracksAsync(RadioStream, LavalinkSearchType.Plain);
             LavalinkTrack track = loadResult.Tracks.First();
             await connection.PlayAsync(track);
+
+            Program.userCount++;
+
             await Task.Run(() =>
             {
                 System.Timers.Timer timer = new System.Timers.Timer(600000);//10 minutes

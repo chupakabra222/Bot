@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ub5yyCs33JKhvaueIK8hVp3NVzSXqUR/Jr4xsk8eO9kBPSuCv+H+gVad6bIraeNUzDr7RXr59Djl5c3icaXbww==",
+  "dgSpecHash": "OszwO0gQFtJUzD0boW6UeXM8RUOoCOfO9Id3Qhke3pxY4wKx3/2xO83Ku2R6gDPfDfS8Z95PYrMGGJ3oYNXkbA==",
   "success": true,
   "projectFilePath": "C:\\Users\\ivasha222\\Desktop\\BotRepos\\Bot\\sln\\Bot\\Bot.csproj",
   "expectedPackageFiles": [
@@ -86,7 +86,8 @@
     "C:\\Users\\ivasha222\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
     "C:\\Users\\ivasha222\\.nuget\\packages\\system.threading.threadpool\\4.3.0\\system.threading.threadpool.4.3.0.nupkg.sha512",
     "C:\\Users\\ivasha222\\.nuget\\packages\\system.threading.timer\\4.3.0\\system.threading.timer.4.3.0.nupkg.sha512",
-    "C:\\Users\\ivasha222\\.nuget\\packages\\system.valuetuple\\4.5.0\\system.valuetuple.4.5.0.nupkg.sha512"
+    "C:\\Users\\ivasha222\\.nuget\\packages\\system.valuetuple\\4.5.0\\system.valuetuple.4.5.0.nupkg.sha512",
+    "C:\\Users\\ivasha222\\.nuget\\packages\\telegram.bot\\19.0.0\\telegram.bot.19.0.0.nupkg.sha512"
   ],
   "logs": []
 }

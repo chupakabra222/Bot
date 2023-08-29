@@ -1437,6 +1437,22 @@
         "runtime": {
           "lib/netcoreapp2.0/_._": {}
         }
+      },
+      "Telegram.Bot/19.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1"
+        },
+        "compile": {
+          "lib/net6.0/Telegram.Bot.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Telegram.Bot.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
       }
     }
   },
@@ -4543,6 +4559,24 @@
         "useSharedDesignerContext.txt",
         "version.txt"
       ]
+    },
+    "Telegram.Bot/19.0.0": {
+      "sha512": "Q16IOitgjGoaJOuqgKQy0FeF+hr/ncmlX2esrhCC7aiyhSX7roYEriWaGAHkQZR8QzbImjFfl4eQh2IxcnOrPg==",
+      "type": "package",
+      "path": "telegram.bot/19.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net6.0/Telegram.Bot.dll",
+        "lib/net6.0/Telegram.Bot.pdb",
+        "lib/net6.0/Telegram.Bot.xml",
+        "lib/netstandard2.0/Telegram.Bot.dll",
+        "lib/netstandard2.0/Telegram.Bot.pdb",
+        "lib/netstandard2.0/Telegram.Bot.xml",
+        "package-icon.png",
+        "telegram.bot.19.0.0.nupkg.sha512",
+        "telegram.bot.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
@@ -4553,7 +4587,8 @@
       "DSharpPlus.Lavalink >= 4.3.0",
       "DSharpPlus.SlashCommands >= 4.3.0",
       "DSharpPlus.VoiceNext >= 4.3.0",
-      "Newtonsoft.Json >= 13.0.3"
+      "Newtonsoft.Json >= 13.0.3",
+      "Telegram.Bot >= 19.0.0"
     ]
   },
   "packageFolders": {
@@ -4622,6 +4657,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.3, )"
+          },
+          "Telegram.Bot": {
+            "target": "Package",
+            "version": "[19.0.0, )"
           }
         },
         "imports": [

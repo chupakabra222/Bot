@@ -137,8 +137,8 @@ namespace Bot
                     //номер первой станции
                     string strNumber = list.Substring(0, 1);
                     Program.number = Int32.Parse(strNumber);
-
-                    await DeleteMessages(messages);
+                    if(messages.Any())
+                        await DeleteMessages(messages);
                     await SendList(channel);
                 }
             }
@@ -186,8 +186,8 @@ namespace Bot
                     return true;
                 return false;
             });
-
-            await DeleteMessages(delMessages);
+            if(delMessages.Any())
+                await DeleteMessages(delMessages);
             return messages;
         }
         async static Task DeleteMessages(IEnumerable<DiscordMessage> messages)

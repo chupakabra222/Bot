@@ -90,6 +90,8 @@ namespace Bot
                 return;
             }
 
+            Program.userCount--;
+
             await connection.DisconnectAsync();
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Поток остановлен"));
         }
