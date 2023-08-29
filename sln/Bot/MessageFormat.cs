@@ -15,6 +15,7 @@ namespace Bot
             {
                 adminMsg = reader.ReadToEnd();
             }
+            file = new FileInfo("message.txt");
         }
         public static string createList(Dictionary<string, Dictionary<string, string>> RadioStreams)
         {
@@ -119,6 +120,13 @@ namespace Bot
                     messages = await Filter(messages);
                     message = GetMessageContentSum(messages);
                 }
+                if ((DateTime.Now - file.LastWriteTime).TotalHours > 1)
+                {
+                    using (StreamReader reader = new StreamReader("message.txt"))
+                    {
+                        adminMsg = await reader.ReadToEndAsync();
+                    }
+                }//проверка сообщения снизу раз в час
 
                 string currentMessage = createList(RadioStreams) + '\r' + adminMsg;
                 if (message != currentMessage)
@@ -250,5 +258,6 @@ namespace Bot
             await channel.SendMessageAsync(adminMsg);
         }
         static string adminMsg;
+        static FileInfo file;
     }
 }

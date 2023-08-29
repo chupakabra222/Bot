@@ -5,6 +5,8 @@ using DSharpPlus.Net;
 using DSharpPlus.SlashCommands;
 
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.IO.Pipes;
 
 namespace Bot
 {
@@ -17,7 +19,8 @@ namespace Bot
 		static async Task MainAsync(string[] args)
 		{
 			AutoResetEvent controller = new AutoResetEvent(true);
-			client.ComponentInteractionCreated += async (s, e) => {
+			client.ComponentInteractionCreated += async (s, e) =>
+			{
 				int ind;
 				int count = MessageFormat.TakeRadioStreams().Count;
 				string list = e.Message.Content;
@@ -53,6 +56,7 @@ namespace Bot
 					}
 					else
 					{
+						userCount++;
 						string number = e.Interaction.Data.Values.First();
 						if (invoker.VoiceState == null)
 						{
@@ -91,8 +95,10 @@ namespace Bot
 					}
 				}
 			};
-			client.GuildCreated += (s, e) => {
-				Task.Run(() => {
+			client.GuildCreated += (s, e) =>
+			{
+				Task.Run(() =>
+				{
 					controller.WaitOne();
 					MessageFormat.UpdateList(e.Guild).GetAwaiter().GetResult();
 					controller.Set();
@@ -102,17 +108,16 @@ namespace Bot
 
 			LavalinkExtension lavalink = client.UseLavalink();
 			lavalink.NodeDisconnected += async (s, e) => await lavalink.ConnectAsync(lavalinkConfig);
-
 			SlashCommandsExtension cmdExt = client.UseSlashCommands();
 			cmdExt.RegisterCommands<Commands>();
 			await client.ConnectAsync();
 			await lavalink.ConnectAsync(lavalinkConfig);
 
 
-
 			System.Timers.Timer updateTimer = new System.Timers.Timer(900000); //MessageFormat.UpdateList раз в 15 минут
-
-			updateTimer.Elapsed += async (s, e) => {
+			System.Timers.Timer infoTimer = new System.Timers.Timer(900000);
+			updateTimer.Elapsed += async (s, e) =>
+			{
 				controller.WaitOne();
 
 				foreach (DiscordGuild guild in client.Guilds.Values)
@@ -120,7 +125,15 @@ namespace Bot
 
 				controller.Set();
 			};
+			infoTimer.Elapsed += (s, e) =>
+			{
+				Console.ForegroundColor = ConsoleColor.Green;
+				Console.WriteLine($"Users count equals {userCount}");
+				Console.ForegroundColor = ConsoleColor.White;
+			};
+
 			updateTimer.Start();
+			infoTimer.Start();
 			await Task.Delay(-1);
 		}
 		static Program()
@@ -141,7 +154,7 @@ namespace Bot
 			config = new DiscordConfiguration
 			{
 				TokenType = TokenType.Bot,
-				MinimumLogLevel = LogLevel.Debug,
+				MinimumLogLevel = LogLevel.Information,
 				Intents = DiscordIntents.AllUnprivileged,
 				AutoReconnect = true
 			};
@@ -153,12 +166,14 @@ namespace Bot
 
 			client = new DiscordClient(config);
 			number = Int32.Parse(MessageFormat.createList(MessageFormat.TakeRadioStreams()).Substring(0, 1));
+
+			userCount = 0;
 		}
 		public static DiscordClient client;
 		static DiscordConfiguration config;
 		static LavalinkConfiguration lavalinkConfig;
 		static ConnectionEndpoint endpoint;
-		public static int number;
-
+		public static int number;//номер первой станции
+		static int userCount;
 	}
 }
