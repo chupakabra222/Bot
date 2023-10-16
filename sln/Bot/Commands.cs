@@ -8,8 +8,8 @@ namespace Bot
 {
     class Commands : ApplicationCommandModule
     {
-        [SlashCommand("play", "play radio stream")]
-        public async Task PlayCommand(InteractionContext ctx, [Option("RadioStream", $"Введите номер радиостанции")] string number)
+        [SlashCommand("play", "play radio stream or video")]
+        public async Task PlayCommand(InteractionContext ctx, [Option("RadioStream", $"Введите номер радиостанции или ссылку на видео")] string number)
         {
             if (ctx.Member.VoiceState == null)
             {
@@ -30,42 +30,8 @@ namespace Bot
         [SlashCommand("List", "It sends a list of radio stations for your choice")]
         public async Task GetRadioStations(InteractionContext ctx)
         {
-            var RadioStreams = MessageFormat.TakeRadioStreams();
-            string list = MessageFormat.createList(RadioStreams);
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Список радиостанций :"));
-            string adminMsg = "";
-            using (StreamReader reader = new StreamReader("message.txt"))
-            {
-                adminMsg = reader.ReadToEnd();
-            }
-            while (list.Length > 2000)
-            {
-                string[] strs = list.Split('\r');
-                StringBuilder builder = new StringBuilder();
-
-                for (int i = 0; i < 70; i++)
-                {
-                    builder.Append(strs[i]);
-                    builder.Append("\r");
-                }
-
-                await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(builder.ToString()));
-
-                builder = new StringBuilder();
-
-                for (int i = 70; i < strs.Length; i++)
-                {
-                    builder.Append(strs[i]);
-                    builder.Append("\r");
-                }
-
-                list = builder.ToString();
-            }
-            DiscordSelectComponent selectMenu = MessageFormat.CreateSelectMenu(1, 20);
-            DiscordButtonComponent button = new DiscordButtonComponent(ButtonStyle.Secondary, "Stop", "", false, new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":stop_button:")));
-            await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(list).AddComponents(selectMenu).AddComponents(button));
-            await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(adminMsg));
-
+            await MessageFormat.SendList(ctx.Channel);
         }
         [SlashCommand("Stop", "Stop stream")]
         public async Task Stop(InteractionContext ctx)
@@ -91,6 +57,9 @@ namespace Bot
             }
 
             Program.userCount--;
+
+            if(Program.guildConnections.ContainsKey(connection))
+                Program.guildConnections.Remove(connection);
 
             await connection.DisconnectAsync();
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Поток остановлен"));

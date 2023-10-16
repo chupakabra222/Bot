@@ -1,9 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.Lavalink;
 using Newtonsoft.Json;
 using System.Text;
-using System.Threading.Channels;
 
 namespace Bot
 {
@@ -15,7 +13,9 @@ namespace Bot
             {
                 adminMsg = reader.ReadToEnd();
             }
-            file = new FileInfo("message.txt");
+            adminMsgFile = new FileInfo("message.txt");
+            radioListFile = new FileInfo("RadioStreams/RadioStream.json");
+            list = TakeRadioStreams();
         }
         public static string createList(Dictionary<string, Dictionary<string, string>> RadioStreams)
         {
@@ -33,20 +33,22 @@ namespace Bot
         }
         public static Dictionary<string, Dictionary<string, string>> TakeRadioStreams()
         {
-            string json = "";
-            Dictionary<string, Dictionary<string, string>> values = null;
-            using (StreamReader reader = new StreamReader("RadioStreams/RadioStream.json", new FileStreamOptions { Mode = FileMode.Open, Access = FileAccess.Read, Share = FileShare.ReadWrite }))
+            if ((DateTime.Now - radioListFile.LastAccessTime).TotalDays > 1 || list == null)
             {
-                while (json.Length == 0)
-                    json = reader.ReadToEnd();
+                string json = "";
+
+                using (StreamReader reader = new StreamReader("RadioStreams/RadioStream.json", new FileStreamOptions { Mode = FileMode.Open, Access = FileAccess.Read, Share = FileShare.ReadWrite }))
+                {
+                    while (json.Length == 0)
+                        json = reader.ReadToEnd();
+                    radioListFile.LastAccessTime = DateTime.Now;
+                }
+
+                if (json != null)
+                    list = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(json);
+
             }
-            if (json != null)
-                values = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(json);
-            if (values == null)
-            {
-                Console.WriteLine(2);
-            }
-            return values;
+            return list;
         }
         public static DiscordSelectComponent CreateSelectMenu(int start, int end)
         {
@@ -120,13 +122,15 @@ namespace Bot
                     messages = await Filter(messages);
                     message = GetMessageContentSum(messages);
                 }
-                if ((DateTime.Now - file.LastWriteTime).TotalHours > 1)
+
+                if ((DateTime.Now - adminMsgFile.LastAccessTime).TotalDays > 1 || adminMsg == null || adminMsg.Length == 0)
                 {
                     using (StreamReader reader = new StreamReader("message.txt"))
                     {
                         adminMsg = await reader.ReadToEndAsync();
                     }
-                }//проверка сообщения снизу раз в час
+                    adminMsgFile.LastAccessTime = DateTime.Now;
+                }//проверка сообщения снизу раз в сутки
 
                 string currentMessage = createList(RadioStreams) + '\r' + adminMsg;
                 if (message != currentMessage)
@@ -137,7 +141,7 @@ namespace Bot
                     //номер первой станции
                     string strNumber = list.Substring(0, 1);
                     Program.number = Int32.Parse(strNumber);
-                    if(messages.Any())
+                    if (messages.Any())
                         await DeleteMessages(messages);
                     await SendList(channel);
                 }
@@ -186,7 +190,7 @@ namespace Bot
                     return true;
                 return false;
             });
-            if(delMessages.Any())
+            if (delMessages.Any())
                 await DeleteMessages(delMessages);
             return messages;
         }
@@ -218,7 +222,7 @@ namespace Bot
             return mess.Trim();
 
         }
-        async static Task SendList(DiscordChannel channel)
+        public async static Task SendList(DiscordChannel channel)
         {
             DiscordSelectComponent selectMenu;
             DiscordButtonComponent button;
@@ -258,6 +262,8 @@ namespace Bot
             await channel.SendMessageAsync(adminMsg);
         }
         static string adminMsg;
-        static FileInfo file;
+        static FileInfo adminMsgFile;
+        static FileInfo radioListFile;
+        static Dictionary<string, Dictionary<string, string>> list;//text list of streams
     }
 }
