@@ -213,7 +213,7 @@ namespace Bot
         {
             string serverBtn = "\u2139";
             string usersBtn = "👤";
-            string password = "29032005";
+            string password = "**********";
             ReplyKeyboardMarkup keyboard = new(new[]
                 {
                     new KeyboardButton[]{$"Users online {usersBtn}", $"Servers info {serverBtn}"},
