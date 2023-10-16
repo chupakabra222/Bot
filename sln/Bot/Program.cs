@@ -10,7 +10,6 @@ namespace Bot
     {
         static void Main(string[] args)
         {
-            Task.Run(MainTg);
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         static async Task MainAsync(string[] args)
