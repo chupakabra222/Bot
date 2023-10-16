@@ -4,14 +4,6 @@ using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
-using Telegram.Bot;
-using Telegram.Bot.Exceptions;
-using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
-using TgMessageType = Telegram.Bot.Types.Enums.MessageType;
-
 namespace Bot
 {
     static class Program
@@ -188,90 +180,8 @@ namespace Bot
             updateTimer.Start();
             await Task.Delay(-1);
         }
-        static void MainTg()
-        {
-            string tgToken = "";
-            using (StreamReader reader = new StreamReader("tgToken.txt"))
-            {
-                tgToken = reader.ReadToEnd();
-            }
-            TelegramBotClientOptions opt = new TelegramBotClientOptions(tgToken);
-            TelegramBotClient tgClient = new TelegramBotClient(opt);
-            CancellationTokenSource cts = new CancellationTokenSource();
-            ReceiverOptions receiverOptions = new()
-            {
-                AllowedUpdates = Array.Empty<UpdateType>() // receive all update types except ChatMember related updates
-            };
-            tgClient.StartReceiving(
-                updateHandler: TgUpdateHandler,
-                pollingErrorHandler: HandlePollingErrorAsync,
-                receiverOptions: receiverOptions,
-                cancellationToken: cts.Token
-                );
-        }
-        static async Task TgUpdateHandler(ITelegramBotClient client, Update update, CancellationToken token)
-        {
-            string serverBtn = "\u2139";
-            string usersBtn = "👤";
-            string password = "**********";
-            ReplyKeyboardMarkup keyboard = new(new[]
-                {
-                    new KeyboardButton[]{$"Users online {usersBtn}", $"Servers info {serverBtn}"},
-                })
-            {
-                ResizeKeyboard = true
-            };
-            if (update.Message != null)
-            {
-                if (update.Message.Type == TgMessageType.Text)
-                {
-                    if (update.Message.Text == "/start")
-                    {
-                        await client.SendTextMessageAsync(
-                            chatId: update.Message.Chat.Id,
-                            text: "Send password",
-                            cancellationToken: token);
-                    }
-                    else if (update.Message.Text == password)
-                    {
-                        await client.SendTextMessageAsync(
-                            chatId: update.Message.Chat.Id,
-                            replyMarkup: keyboard,
-                            text: "Press button",
-                            cancellationToken: token);
-                    }
-                    else if (update.Message.Text == $"Users online {usersBtn}")
-                    {
-                        await client.SendTextMessageAsync(
-                            chatId: update.Message.Chat.Id,
-                            replyMarkup: keyboard,
-                            text: $"Users online count equals {userCount.ToString()}",
-                            cancellationToken: token);
-                    }
-                    else if (update.Message.Text == $"Servers info {serverBtn}")
-                    {
-                        await client.SendTextMessageAsync(
-                            chatId: update.Message.Chat.Id,
-                            replyMarkup: keyboard,
-                            text: $"Servers count equals {Program.client.Guilds.Count.ToString()}",
-                            cancellationToken: token);
-                    }
-                }
-            }
-            return;
-        }
-        static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
-        {
-            var ErrorMessage = exception switch
-            {
-                ApiRequestException apiRequestException
-                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
-                _ => exception.ToString()
-            };
+        
 
-            Console.WriteLine(ErrorMessage);
-            return Task.CompletedTask;
-        }
 
         static Program()
         {
