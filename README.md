@@ -1,8 +1,10 @@
+<div align = "center">
 <H2>RadioYaGor</H2>
 
 <picture>
     <img src="https://i.pinimg.com/originals/60/42/4e/60424e6920d5c8eb4a6c74accbad79dc.png" data-canonical-src="https://assets.trpc.io/www/trpc-readme.png" style="visibility:visible;max-width:100%;">
 </picture>
+</div>
 <p>This is music bot, which play radio stream</p>
 <p>It have simple UI</p>
 <img src = "https://github.com/chupakabra222/Bot/assets/141832577/bb2ed578-9620-4df6-acef-3d4a69f39f0e"/>
