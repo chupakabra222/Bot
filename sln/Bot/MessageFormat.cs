@@ -104,7 +104,7 @@ namespace Bot
                 DiscordGuild guild = (DiscordGuild)gl;
                 DiscordChannel channel = await FindChannel(guild);
                 IEnumerable<DiscordMessage> messages = await channel.GetMessagesAsync();
-
+                IEnumerable<DiscordMessage> msgesWithBtn = messages.Where(m => m.Components.Any());
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"update {channel.Guild.Name}");
@@ -133,7 +133,7 @@ namespace Bot
                 }//проверка сообщения снизу раз в сутки
 
                 string currentMessage = createList(RadioStreams) + '\r' + adminMsg;
-                if (message != currentMessage)
+                if (message != currentMessage || msgesWithBtn.Count() == 0 || msgesWithBtn.First().Components.Count < 2)
                 {
                     Stack<DiscordMessage> messageStack = new Stack<DiscordMessage>();
                     string list = createList(RadioStreams);
@@ -225,7 +225,9 @@ namespace Bot
         public async static Task SendList(DiscordChannel channel)
         {
             DiscordSelectComponent selectMenu;
-            DiscordButtonComponent button;
+            DiscordButtonComponent stopBtn;
+            DiscordButtonComponent nextBtn;
+            DiscordButtonComponent backBtn;
             string list = createList(TakeRadioStreams());
 
             //номер первой станции
@@ -257,8 +259,10 @@ namespace Bot
 
             }
             selectMenu = CreateSelectMenu(Program.number, 20);
-            button = new DiscordButtonComponent(ButtonStyle.Secondary, "Stop", "", false, new DiscordComponentEmoji(DiscordEmoji.FromName(Program.client, ":stop_button:")));
-            await channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(list).AddComponents(selectMenu).AddComponents(button));
+            stopBtn = new DiscordButtonComponent(ButtonStyle.Secondary, "Stop", "", false, new DiscordComponentEmoji(DiscordEmoji.FromName(Program.client, ":stop_button:")));
+            nextBtn = new DiscordButtonComponent(ButtonStyle.Secondary, "Next", "", false, new DiscordComponentEmoji(DiscordEmoji.FromName(Program.client, ":next_track:")));
+            backBtn = new DiscordButtonComponent(ButtonStyle.Secondary, "Back", "", false, new DiscordComponentEmoji(DiscordEmoji.FromName(Program.client, ":previous_track:")));
+            await channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(list).AddComponents(selectMenu).AddComponents(stopBtn, backBtn, nextBtn));
             await channel.SendMessageAsync(adminMsg);
         }
         static string adminMsg;

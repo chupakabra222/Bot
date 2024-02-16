@@ -6,49 +6,63 @@ namespace Bot
 {
     internal static class Player
     {
-        public static async Task StartPlay(DiscordClient client, DiscordMember member, string number)
+        public async static void StartPlay(DiscordClient client, DiscordMember member, string number)
         {
 
             LavalinkExtension lavalink = client.GetLavalink();
-            LavalinkNodeConnection node = lavalink.ConnectedNodes.First().Value;
+            LavalinkNodeConnection node = null;
+            LavalinkGuildConnection connection = null;
+            if (lavalink.ConnectedNodes.Count > 0)
+                node = lavalink.ConnectedNodes.First().Value;
+
             DiscordChannel channel = member.VoiceState.Channel;
-            LavalinkGuildConnection connection = await node.ConnectAsync(channel);
+
+            if (node != null)
+                if (channel.Type == ChannelType.Voice)
+                    if(!node.ConnectedGuilds.ContainsKey(channel.Guild.Id))
+                        connection = await node.ConnectAsync(channel);
+                    else
+                        connection = node.ConnectedGuilds[channel.Guild.Id];
 
             Dictionary<string, Dictionary<string, string>> RadioStreamsDictionary = MessageFormat.TakeRadioStreams();
             var RadioStream = RadioStreamsDictionary[number].Values.First();
             LavalinkLoadResult loadResult = await node.Rest.GetTracksAsync(RadioStream, LavalinkSearchType.Plain);
-            LavalinkTrack track = loadResult.Tracks.First();
+            if (loadResult.Tracks.Count() > 0)
+            {
+                LavalinkTrack track = loadResult.Tracks.First();
+                await connection.PlayAsync(track);
 
-            await connection.PlayAsync(track);
+                Program.connController.WaitOne();
+                InitStopTimer(connection, number);
+                Program.connController.Set();
+            }
+            else
+            {
+                await connection.DisconnectAsync();
+                DeleteStopTimer(connection);
+                DiscordChannel botChannel = null;
+                foreach(var chan in channel.Guild.Channels.Values)
+                {
+                    if (chan.Name == "radio_by_yagor")
+                    {
+                        botChannel = chan;
+                        break;
+                    }
+                }
+                await botChannel.SendMessageAsync("Станция временно не работает");
 
-            Program.userCount++;
+            }
 
-            InitStopTimer(connection);
         }
-        static void InitStopTimer(LavalinkGuildConnection connection)
+        static void InitStopTimer(LavalinkGuildConnection connection, string number)
         {
-            //await Task.Run(() =>
-            //{
-            //    System.Timers.Timer timer = new System.Timers.Timer(new TimeSpan(0, 10, 0).TotalMilliseconds);//10 minutes
-            //    byte counter = 0;
-            //    timer.Elapsed += async (s, e) =>
-            //    {
-            //        if (channel.Users.Count == 1 && counter == 1)
-            //        {
-            //            if (connection.IsConnected)
-            //                await connection.DisconnectAsync();
-            //            Program.userCount--;
-            //            timer.Dispose();
-            //        }
-            //        else if (channel.Users.Count == 1 && counter == 0)
-            //            counter++;
-            //        else if (channel.Users.Count > 1 && counter != 0)
-            //            counter--;
-            //    };
-            //    timer.Start();
-            //});//отключить воспроизведение если никого нет 20 минут
+            if (!Program.guildConnections.ContainsKey(connection))
+                Program.guildConnections.Add(connection, new KeyValuePair<byte, string>(0, number));
+        }
+        public static void DeleteStopTimer(LavalinkGuildConnection connection)
+        {
             if(!Program.guildConnections.ContainsKey(connection))
-                Program.guildConnections.Add(connection, 0);
+                Program.guildConnections.Remove(connection);
         }
     }
 }

@@ -23,7 +23,14 @@ namespace Bot
         }
         static async Task MainAsync(string[] args)
         {
-            AutoResetEvent controller = new AutoResetEvent(true);
+            AutoResetEvent updateController = new AutoResetEvent(true);
+
+            LavalinkExtension lavalink = client.UseLavalink();
+            SlashCommandsExtension cmdExt = client.UseSlashCommands();
+            cmdExt.RegisterCommands<Commands>();
+            await client.ConnectAsync();
+            await lavalink.ConnectAsync(lavalinkConfig);
+
             client.ComponentInteractionCreated += async (s, e) =>
             {
                 int ind;
@@ -31,7 +38,9 @@ namespace Bot
                 string list = e.Message.Content;
                 DiscordSelectComponent selectMenu;
                 DiscordSelectComponent oldSelectMenu = e.Message.Components.First().Components.First() as DiscordSelectComponent;
-                DiscordButtonComponent button = e.Message.Components.Last().Components.First() as DiscordButtonComponent;
+                DiscordButtonComponent stopBtn = e.Message.Components.Last().Components.First() as DiscordButtonComponent;
+                DiscordButtonComponent backBtn = e.Message.Components.Last().Components.Skip(1).First() as DiscordButtonComponent;
+                DiscordButtonComponent nextBtn = e.Message.Components.Last().Components.Skip(2).First() as DiscordButtonComponent;
                 DiscordMember invoker = await e.Guild.GetMemberAsync(e.User.Id);
                 IEnumerable<DiscordSelectComponentOption> RadioList;
                 if (e.Interaction.Data.Values.Length > 0)
@@ -45,7 +54,7 @@ namespace Bot
                         else
                             selectMenu = MessageFormat.CreateSelectMenu(ind + 1, count);
 
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(selectMenu).AddComponents(button));
+                        await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(selectMenu).AddComponents(stopBtn, backBtn, nextBtn));
                     }
                     else if (e.Interaction.Data.Values.First() == "Back")
                     {
@@ -57,7 +66,7 @@ namespace Bot
                         }
                         else
                             selectMenu = MessageFormat.CreateSelectMenu(Program.number, ind - 1);
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(selectMenu).AddComponents(button));
+                        await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(selectMenu).AddComponents(stopBtn, backBtn, nextBtn));
                     }
                     else
                     {
@@ -68,8 +77,8 @@ namespace Bot
                             return;
                         }
                         DiscordChannel channel = invoker.VoiceState.Channel;
-                        await Player.StartPlay(client, invoker, number);
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(oldSelectMenu).AddComponents(button));
+                        Player.StartPlay(client, invoker, number);
+                        await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(oldSelectMenu).AddComponents(stopBtn, backBtn, nextBtn));
                     }
                 else
                 {
@@ -82,10 +91,10 @@ namespace Bot
                             return;
                         }
                         LavalinkNodeConnection node = lavalink.ConnectedNodes.First().Value;
-
+                        
                         LavalinkGuildConnection connection = node.GetGuildConnection(e.Interaction.Guild);
-                        if (guildConnections.ContainsKey(connection))
-                            guildConnections.Remove(connection);
+                        if (connection != null)
+                            Player.DeleteStopTimer(connection);
 
                         if (connection == null)
                         {
@@ -99,10 +108,90 @@ namespace Bot
                         }
                         await connection.DisconnectAsync();
 
-                        userCount--;
-
                         await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Поток остановлен"));
 
+                    }
+                    else if(e.Interaction.Data.CustomId == "Next")
+                    {
+                        LavalinkExtension lavalink = client.GetLavalink();
+                        if (!lavalink.ConnectedNodes.Any())
+                        {
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Проблема на стороне сервера"));
+                            return;
+                        }
+                        LavalinkNodeConnection node = lavalink.ConnectedNodes.First().Value;
+
+                        LavalinkGuildConnection connection = node.GetGuildConnection(e.Interaction.Guild);
+                        if (invoker.VoiceState == null)
+                        {
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Вы не подключены к какому-либо голосовому каналу"));
+                            return;
+                        }
+
+                        if (connection == null)
+                        {
+                            Player.StartPlay(client, invoker, "1");
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(oldSelectMenu).AddComponents(stopBtn, backBtn, nextBtn));
+                            return;
+                        }
+                        else
+                        {
+                            connController.WaitOne();
+                            int number = int.Parse(guildConnections[connection].Value);
+                            byte control = guildConnections[connection].Key;
+
+                            if (number < MessageFormat.TakeRadioStreams().Count)
+                                number++;
+                            else
+                                number = 1;
+
+                            guildConnections.Remove(connection);
+                            guildConnections.Add(connection, new KeyValuePair<byte, string>(control, number.ToString()));
+                            connController.Set();
+                            Player.StartPlay(client, invoker, number.ToString());
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(oldSelectMenu).AddComponents(stopBtn, backBtn, nextBtn));
+                        }
+                    }
+                    else if (e.Interaction.Data.CustomId == "Back")
+                    {
+                        LavalinkExtension lavalink = client.GetLavalink();
+                        if (!lavalink.ConnectedNodes.Any())
+                        {
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Проблема на стороне сервера"));
+                            return;
+                        }
+                        LavalinkNodeConnection node = lavalink.ConnectedNodes.First().Value;
+
+                        LavalinkGuildConnection connection = node.GetGuildConnection(e.Interaction.Guild);
+                        if (invoker.VoiceState == null)
+                        {
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Вы не подключены к какому-либо голосовому каналу"));
+                            return;
+                        }
+
+                        if (connection == null)
+                        {
+                            Player.StartPlay(client, invoker, MessageFormat.TakeRadioStreams().Count.ToString());
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(oldSelectMenu).AddComponents(stopBtn, backBtn, nextBtn));
+                            return;
+                        }
+                        else
+                        {
+                            connController.WaitOne();
+                            int number = int.Parse(guildConnections[connection].Value);
+                            byte control = guildConnections[connection].Key;
+
+                            if (number > 0)
+                                number--;
+                            else
+                                number = MessageFormat.TakeRadioStreams().Count;
+
+                            guildConnections.Remove(connection);
+                            guildConnections.Add(connection, new KeyValuePair<byte, string>(control, number.ToString()));
+                            connController.Set();
+                            Player.StartPlay(client, invoker, number.ToString());
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(list).AddComponents(oldSelectMenu).AddComponents(stopBtn, backBtn, nextBtn));
+                        }
                     }
                 }
             };
@@ -110,52 +199,46 @@ namespace Bot
             {
                 Task.Run(() =>
                 {
-                    controller.WaitOne();
+                    updateController.WaitOne();
                     MessageFormat.UpdateList(e.Guild).GetAwaiter().GetResult();
-                    controller.Set();
+                    updateController.Set();
                 });
                 return Task.CompletedTask;
             };
 
-            LavalinkExtension lavalink = client.UseLavalink();
-            lavalink.NodeDisconnected += async (s, e) => await lavalink.ConnectAsync(lavalinkConfig);
-            SlashCommandsExtension cmdExt = client.UseSlashCommands();
-            cmdExt.RegisterCommands<Commands>();
-            await client.ConnectAsync();
-            await lavalink.ConnectAsync(lavalinkConfig);
-
             System.Timers.Timer stopTimer = new System.Timers.Timer(new TimeSpan(0, 10, 0).TotalMilliseconds);
-            System.Timers.Timer updateTimer = new System.Timers.Timer(new TimeSpan(0, 15, 0).TotalMilliseconds); //MessageFormat.UpdateList раз в 15 минут
+            System.Timers.Timer updateTimer = new System.Timers.Timer(new TimeSpan(0, 0, 10).TotalMilliseconds); //MessageFormat.UpdateList раз в 15 минут
 
             stopTimer.Elapsed += async (s, e) =>
             {
                 try
                 {
                     var connections = lavalink.ConnectedNodes.First().Value.ConnectedGuilds.Values.ToArray();
-                    for (int i = 0; i < connections.Length; i++)
+                    connController.WaitOne();
+                    Parallel.ForEach(connections, async e => 
                     {
-                        LavalinkGuildConnection connection = connections[i];
+                        LavalinkGuildConnection connection = e;
                         byte counter;
+                        string number = guildConnections[connection].Value;
                         if (connection.IsConnected && guildConnections.ContainsKey(connection))
                         {
-                            counter = guildConnections[connection];
+                            counter = guildConnections[connection].Key;
                             DiscordChannel channel = connection.Channel;
                             if (channel.Users.Count == 1 && counter == 1)
                             {
                                 if (connection.IsConnected)
                                     await connection.DisconnectAsync();
                                 guildConnections.Remove(connection);
-                                Program.userCount--;
                             }
                             else if (channel.Users.Count == 1 && counter == 0)
                             {
                                 guildConnections.Remove(connection);
-                                guildConnections.Add(connection, ++counter);
+                                guildConnections.Add(connection, new KeyValuePair<byte, string>(++counter, number));
                             }
                             else if (channel.Users.Count > 1 && counter != 0)
                             {
                                 guildConnections.Remove(connection);
-                                guildConnections.Add(connection, --counter);
+                                guildConnections.Add(connection, new KeyValuePair<byte, string>(--counter, number));
                             }
                         }
                         else if (!connection.IsConnected && guildConnections.ContainsKey(connection))
@@ -164,28 +247,68 @@ namespace Bot
                         }
                         else if (connection.IsConnected && !guildConnections.ContainsKey(connection))
                         {
-                            guildConnections.Add(connection, 0);
+                            guildConnections.Add(connection, new KeyValuePair<byte, string>(0, number));
                         }
-                    }
+                    });
+                    connController.Set();
+                    //for (int i = 0; i < connections.Count(); i++)
+                    //{
+                    //    connController.WaitOne();
+                    //    LavalinkGuildConnection connection = connections[i];
+                    //    byte counter;
+                    //    string number = guildConnections[connection].Value;
+                    //    if (connection.IsConnected && guildConnections.ContainsKey(connection))
+                    //    {
+                    //        counter = guildConnections[connection].Key;
+                    //        DiscordChannel channel = connection.Channel;
+                    //        if (channel.Users.Count == 1 && counter == 1)
+                    //        {
+                    //            if (connection.IsConnected)
+                    //                await connection.DisconnectAsync();
+                    //            guildConnections.Remove(connection);
+                    //        }
+                    //        else if (channel.Users.Count == 1 && counter == 0)
+                    //        {
+                    //            guildConnections.Remove(connection);
+                    //            guildConnections.Add(connection, new KeyValuePair<byte, string>(++counter, number));
+                    //        }
+                    //        else if (channel.Users.Count > 1 && counter != 0)
+                    //        {
+                    //            guildConnections.Remove(connection);
+                    //            guildConnections.Add(connection, new KeyValuePair<byte, string>(--counter, number));
+                    //        }
+                    //    }
+                    //    else if (!connection.IsConnected && guildConnections.ContainsKey(connection))
+                    //    {
+                    //        guildConnections.Remove(connection);
+                    //    }
+                    //    else if (connection.IsConnected && !guildConnections.ContainsKey(connection))
+                    //    {
+                    //        guildConnections.Add(connection, new KeyValuePair<byte, string>(0, number));
+                    //    }
+                    //    connController.Set();
+                    //}
                 }
                 catch (Exception ex)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(ex.Message);
                     Console.ForegroundColor = ConsoleColor.White;
+                    connController.Set();
                 }
             };
-            updateTimer.Elapsed += async (s, e) =>
+            updateTimer.Elapsed += (s, e) =>
             {
-                foreach (DiscordGuild guild in client.Guilds.Values)
-                {
-                    controller.WaitOne();
-                    await MessageFormat.UpdateList(guild);
-                    controller.Set();
-                }
+                updateController.WaitOne();
+                Parallel.ForEach(client.Guilds.Values, async (guild) => await MessageFormat.UpdateList(guild));
+                updateController.Set();
             };
             stopTimer.Start();
             updateTimer.Start();
+
+            updateController.WaitOne();
+            Parallel.ForEach(client.Guilds.Values, async (guild) => await MessageFormat.UpdateList(guild));
+            updateController.Set();
             await Task.Delay(-1);
         }
         static void MainTg()
@@ -245,7 +368,7 @@ namespace Bot
                         await client.SendTextMessageAsync(
                             chatId: update.Message.Chat.Id,
                             replyMarkup: keyboard,
-                            text: $"Users online count equals {userCount.ToString()}",
+                            text: $"Users online count equals {Program.client.GetLavalink().ConnectedNodes.First().Value.ConnectedGuilds.Count}",
                             cancellationToken: token);
                     }
                     else if (update.Message.Text == $"Servers info {serverBtn}")
@@ -291,8 +414,8 @@ namespace Bot
             config = new DiscordConfiguration
             {
                 TokenType = TokenType.Bot,
-                MinimumLogLevel = LogLevel.Information,
-                Intents = DiscordIntents.AllUnprivileged,
+                MinimumLogLevel = LogLevel.Debug,
+                Intents = DiscordIntents.AllUnprivileged, //DiscordIntents.AllUnprivileged
                 AutoReconnect = true
             };
 
@@ -304,15 +427,14 @@ namespace Bot
             client = new DiscordClient(config);
             number = Int32.Parse(MessageFormat.createList(MessageFormat.TakeRadioStreams()).Substring(0, 1));
 
-            userCount = 0;
-            guildConnections = new Dictionary<LavalinkGuildConnection, byte>();
+            guildConnections = new Dictionary<LavalinkGuildConnection, KeyValuePair<byte, string>>();
         }
         public static DiscordClient client;
         static DiscordConfiguration config;
         static LavalinkConfiguration lavalinkConfig;
         static ConnectionEndpoint endpoint;
         public static int number;//номер первой станции
-        internal static int userCount;
-        internal static Dictionary<LavalinkGuildConnection, byte> guildConnections;
+        public static AutoResetEvent connController = new AutoResetEvent(true);
+        internal static Dictionary<LavalinkGuildConnection, KeyValuePair<byte, string>> guildConnections;
     }
 }

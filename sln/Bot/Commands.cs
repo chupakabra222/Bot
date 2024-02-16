@@ -8,15 +8,14 @@ namespace Bot
 {
     class Commands : ApplicationCommandModule
     {
-        [SlashCommand("play", "play radio stream or video")]
-        public async Task PlayCommand(InteractionContext ctx, [Option("RadioStream", $"Введите номер радиостанции или ссылку на видео")] string number)
+        [SlashCommand("Play", "Play radio stream or video")]
+        public async Task PlayCommand(InteractionContext ctx, [Option("RadioStream", $"Введите номер радиостанции")] string number)
         {
             if (ctx.Member.VoiceState == null)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Вы не подключенны к какому-либо голосовому каналу"));
                 return;
             }
-            DiscordChannel channel = ctx.Member.VoiceState.Channel;
             LavalinkExtension lavalink = ctx.Client.GetLavalink();
 
             if (!lavalink.ConnectedNodes.Any())
@@ -24,8 +23,8 @@ namespace Bot
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Проблема на стороне сервера"));
                 return;
             }
-            await Player.StartPlay(ctx.Client, ctx.Member, number);
-            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent($"Начато транслирование"));
+            Player.StartPlay(ctx.Client, ctx.Member, number);
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Начато транслирование"));
         }
         [SlashCommand("List", "It sends a list of radio stations for your choice")]
         public async Task GetRadioStations(InteractionContext ctx)
@@ -56,12 +55,13 @@ namespace Bot
                 return;
             }
 
-            Program.userCount--;
-
-            if(Program.guildConnections.ContainsKey(connection))
-                Program.guildConnections.Remove(connection);
+            Program.connController.WaitOne();
+            Player.DeleteStopTimer(connection);
+            Program.connController.Set();
 
             await connection.DisconnectAsync();
+            
+
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Поток остановлен"));
         }
     }
