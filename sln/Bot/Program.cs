@@ -4,21 +4,12 @@ using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
-using Telegram.Bot;
-using Telegram.Bot.Exceptions;
-using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
-using TgMessageType = Telegram.Bot.Types.Enums.MessageType;
-
 namespace Bot
 {
     static class Program
     {
         static void Main(string[] args)
         {
-            Task.Run(MainTg);
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         static async Task MainAsync(string[] args)
@@ -392,9 +383,6 @@ namespace Bot
                 _ => exception.ToString()
             };
 
-            Console.WriteLine(ErrorMessage);
-            return Task.CompletedTask;
-        }
 
         static Program()
         {
